@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Ranger Nexus | 7 Windy Cams (iframe) + AI + Live Traffic</title>
+    <title>Ranger Nexus | Fixed Windy Cams + AI + Live Traffic</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -570,7 +570,7 @@
     <aside id="sidebar">
         <div class="sidebar-header">
             <span class="logo">🛡️</span>
-            <h1>Ranger Nexus<span>7 Cams (iframe) + AI + Live Traffic</span></h1>
+            <h1>Ranger Nexus<span>Fixed Windy Cams + AI</span></h1>
         </div>
 
         <div class="sidebar-section"><h3>🔐 Ranger Login</h3>
@@ -639,10 +639,10 @@
         </div>
 
         <div class="sidebar-section"><h3>💻 Dispatch Terminal</h3>
-            <div id="terminal-panel"><p class="line">RANGER-OS v26 — iframe webcams</p></div>
+            <div id="terminal-panel"><p class="line">RANGER-OS v27 — Fixed Windy webcams</p></div>
         </div>
 
-        <!-- UPDATED WINDY WEBCAMS SECTION (iframe version) -->
+        <!-- Windy Webcams Section (fixed switchCloudCam) -->
         <div class="sidebar-section">
             <h3>📹 Windy Live Cameras</h3>
             <div id="windy-container" style="width:100%;min-height:250px;background:#000;border-radius:10px;overflow:hidden;"></div>
@@ -1027,7 +1027,7 @@
     map.on("zoom", updateGlobeRotation);
     setTimeout(updateGlobeRotation, 500);
 
-    // ==================== WINDY WEBCAMS (IFRAME VERSION - REUSED) ====================
+    // ==================== WINDY WEBCAMS (FIXED FUNCTION) ====================
     const cloudCams = [
         { id: "1739611817", name: "Boracay - Crimson Resort" },
         { id: "1638604776", name: "Tapaz" },
@@ -1039,27 +1039,52 @@
     ];
     let currentCloudCam = 0;
 
-    // REUSED FUNCTION: iframe-based switchCloudCam
     function switchCloudCam(index) {
         currentCloudCam = index;
         const cam = cloudCams[index];
         const container = document.getElementById("windy-container");
         const status = document.getElementById("cloud-status");
-        if (!container) return;
+
+        if (!container || !status) return;
+
         status.textContent = `STATUS: LOADING ${cam.name}...`;
+
+        // Windy needs the FULL embed block inserted
         container.innerHTML = `
-            <iframe
-                width="100%"
-                height="250"
-                src="https://embed.windy.com/embed2.html?webcam=${cam.id}"
-                frameborder="0"
-                allowfullscreen>
-            </iframe>
+            <div id="windy-webcam-container">
+                <a
+                    name="windy-webcam-timelapse-player"
+                    data-id="${cam.id}"
+                    data-play="day"
+                    data-loop="0"
+                    data-auto-play="1"
+                    data-force-full-screen-on-overlay-play="0"
+                    data-interactive="1"
+                    href="https://windy.com/webcams/${cam.id}"
+                    target="_blank"
+                >
+                    ${cam.name}
+                </a>
+            </div>
         `;
-        setTimeout(() => {
+
+        // Remove old script if exists
+        const oldScript = document.getElementById("windy-script");
+        if (oldScript) {
+            oldScript.remove();
+        }
+
+        // Create fresh script
+        const script = document.createElement("script");
+        script.id = "windy-script";
+        script.src = "https://webcams.windy.com/webcams/public/embed/v2/script/player.js";
+        script.async = true;
+        script.onload = () => {
             status.textContent = `STATUS: LIVE - ${cam.name}`;
-        }, 1000);
-        terminalLog(`Windy webcam loaded: ${cam.name}`);
+            terminalLog(`Windy cam loaded: ${cam.name}`);
+            showAlert(`📹 ${cam.name} webcam loaded`);
+        };
+        document.body.appendChild(script);
     }
 
     // Auto-load first camera
@@ -1150,7 +1175,7 @@
         if (STATE.loggedInRanger?.name) rangerName = STATE.loggedInRanger.name;
         const greetings = [`Welcome back, ${rangerName}. All surveillance systems are operational.`, `Hello ${rangerName}. Weather monitoring and patrol systems are online.`, `${rangerName}, the Ranger Nexus network is active and tracking live conditions.`, `Greetings ${rangerName}. AI analysis systems ready for field operations.`];
         const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-        msg.innerHTML = `${randomGreeting}<br><br>🌦️ Weather systems active<br>📡 Radar online<br>📹 ${cloudCams.length} Windy cameras connected (iframe)<br>🌍 Globe tracking initialized<br>💬 AI Chatbox ready<br>✈️ Live aircraft tracking active`;
+        msg.innerHTML = `${randomGreeting}<br><br>🌦️ Weather systems active<br>📡 Radar online<br>📹 ${cloudCams.length} Windy cameras connected (fixed script reload)<br>🌍 Globe tracking initialized<br>💬 AI Chatbox ready<br>✈️ Live aircraft tracking active`;
         setTimeout(() => { popup.style.transform = "translateX(0px)"; }, 800);
     }
     function closeAIPopup() { const popup = document.getElementById("ai-popup"); popup.style.transform = "translateX(400px)"; }
@@ -1221,8 +1246,8 @@
         fetchWeatherData(STATE.userLat, STATE.userLng);
         refreshAllReportMarkers();
         setInterval(() => fetchWeatherData(STATE.userLat, STATE.userLng), 300000);
-        terminalLog('Ranger Nexus v26 | Windy webcams switched to iframe embed');
-        showAlert('System ready. Webcams now use direct iframe embed.');
+        terminalLog('Ranger Nexus v27 | Windy webcams fixed (script reload on switch)');
+        showAlert('System ready. Webcams now reload correctly when switched.');
     }
     document.getElementById('report-modal')?.addEventListener('click', (e) => { if(e.target === document.getElementById('report-modal')) closeReportModal(); });
     init();
