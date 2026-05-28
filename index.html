@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Ranger Nexus | Fixed Windy Cams + AI + Live Traffic</title>
+    <title>🦊 Luminara | Windy Live Cams + Weather Patrol</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -131,10 +131,17 @@
             text-transform: uppercase;
         }
 
+        /* Sidebar sections fade‑in */
         .sidebar-section {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
+            animation: fadePanel 0.5s ease;
         }
+        @keyframes fadePanel {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .sidebar-section h3 {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -147,6 +154,53 @@
             flex-grow: 1;
             overflow-y: auto;
             min-height: 100px;
+        }
+
+        /* Hover effects for cards, buttons, sections */
+        .sidebar-section,
+        .weather-card,
+        .report-item,
+        .btn,
+        .nav-toggle {
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .sidebar-section:hover,
+        .weather-card:hover,
+        .report-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
+        }
+        .btn:hover,
+        .nav-toggle:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 18px rgba(46, 125, 50, 0.45);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            text-align: left;
+            padding: 10px;
+            border-radius: 10px;
+            position: absolute;
+            z-index: 2000;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.25s;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
 
         /* Buttons */
@@ -164,10 +218,6 @@
             background: var(--input-bg);
             color: var(--text);
             font-family: var(--font);
-        }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .btn.primary {
             background: var(--accent);
@@ -219,45 +269,40 @@
             white-space: nowrap;
         }
 
-        /* NAVIGATION MENU */
-        .map-controls {
+        /* OPS MENU (navigation panel) */
+        .nav-panel {
             position: absolute;
             top: 12px;
             right: 16px;
             z-index: 1200;
         }
-        .nav-toggle-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            color: var(--text);
-            font-size: 20px;
+        .nav-toggle {
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: var(--shadow);
+            font-weight: 600;
+            backdrop-filter: blur(10px);
         }
         .nav-menu {
-            margin-top: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 10px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            min-width: 170px;
-            box-shadow: var(--shadow);
-            animation: fadeMenu 0.2s ease;
-        }
-        .nav-menu.hidden {
             display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 12px;
+            border-radius: 16px;
+            backdrop-filter: blur(14px);
+            min-width: 180px;
         }
-        @keyframes fadeMenu {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
+        .nav-menu.active {
+            display: flex;
+        }
+        @media (max-width: 768px) {
+            .nav-panel { right: 10px; top: 10px; }
+            .nav-menu { width: 180px; }
         }
 
         /* Alert banner */
@@ -283,7 +328,7 @@
             50% { box-shadow: 0 0 0 18px rgba(198, 40, 40, 0); }
         }
 
-        /* SPINNING GLOBE */
+        /* Spinning Globe */
         .globe-widget {
             position: fixed;
             bottom: 24px;
@@ -493,6 +538,98 @@
             font-weight: bold;
         }
 
+        /* Floating Radio Widget */
+        #floating-radio {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            width: 320px;
+            height: 260px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(14px);
+            border-radius: 18px;
+            z-index: 1200;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #radio-header {
+            padding: 10px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+        #radio-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            color: white;
+            font-size: 13px;
+        }
+        #radio-input-area {
+            display: flex;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #radio-input-area input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px;
+            color: white;
+        }
+        #radio-input-area button {
+            width: 50px;
+            border: none;
+            background: #2e7d32;
+            color: white;
+            cursor: pointer;
+        }
+        /* Online Users Panel */
+        #online-users {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            color: white;
+            font-size: 12px;
+        }
+        .user-title {
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+        .user-item {
+            padding: 4px 0;
+        }
+
+        /* AI Greeting Box (new) */
+        #ai-greeting-box {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            width: 320px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(14px);
+            border-radius: 18px;
+            padding: 16px;
+            color: white;
+            z-index: 1400;
+            animation: aiPopup 0.6s ease;
+            box-shadow: 0 0 25px rgba(0, 255, 180, 0.15);
+            border: 1px solid rgba(0, 255, 180, 0.15);
+        }
+        #ai-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        #ai-typing-text {
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 70px;
+        }
+        @keyframes aiPopup {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Modal */
         .modal-overlay {
             position: fixed;
@@ -524,7 +661,7 @@
             color: var(--text);
         }
 
-        /* AI welcome popup */
+        /* AI welcome popup (legacy, kept for compatibility) */
         #ai-popup {
             position: fixed;
             top: 20px;
@@ -549,8 +686,6 @@
             #sidebar { position: absolute; left: 0; top: 0; width: 88vw; min-width: 88vw; height: 100%; z-index: 2000; transform: translateX(0); transition: transform 0.3s ease; }
             #sidebar.collapsed { transform: translateX(-100%); width: 88vw; min-width: 88vw; }
             #sidebar-toggle { left: 12px !important; top: 12px; width: 42px; height: 42px; font-size: 20px; z-index: 3000; }
-            .map-controls { top: 10px; right: 10px; }
-            .nav-toggle-btn { width: 40px; height: 40px; font-size: 18px; }
             .map-overlay-bottom { width: calc(100% - 20px); left: 10px; transform: none; bottom: 10px; text-align: center; font-size: 0.65rem; white-space: normal; }
             .weather-grid { grid-template-columns: 1fr 1fr; }
             .weather-card .val { font-size: 1.1rem; }
@@ -562,6 +697,7 @@
             input, textarea, select { font-size: 16px !important; }
             #ai-popup { right: 10px !important; left: 10px; width: auto !important; top: 10px; }
             #ai-chatbox { left: 10px; right: 10px; width: auto; bottom: 10px; }
+            #ai-greeting-box { right: 10px; left: 10px; width: auto; top: 80px; }
         }
     </style>
 </head>
@@ -569,13 +705,13 @@
 <div id="app-container">
     <aside id="sidebar">
         <div class="sidebar-header">
-            <span class="logo">🛡️</span>
-            <h1>Ranger Nexus<span>Fixed Windy Cams + AI</span></h1>
+            <span class="logo">🦊</span>
+            <h1>Luminara<span>Windy Live Cams + Weather Patrol</span></h1>
         </div>
 
         <div class="sidebar-section"><h3>🔐 Ranger Login</h3>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <input type="text" id="ranger-name-input" placeholder="Ranger ID" style="flex:1">
+                <input type="text" id="ranger-name-input" placeholder="Luminarian ID" style="flex:1">
                 <input type="password" id="ranger-pass-input" placeholder="Pass" style="flex:1">
                 <button class="btn primary small" onclick="rangerLogin()">Login</button>
             </div>
@@ -591,7 +727,14 @@
             </div>
         </div>
 
-        <div class="sidebar-section"><h3>🌡️ Weather Dashboard</h3>
+        <!-- Tooltip added to Weather Dashboard heading -->
+        <div class="tooltip">
+            <h3>🌡️ Weather Dashboard</h3>
+            <div class="tooltip-text">
+                Displays live environmental data including temperature, wind speed, sunrise, and visibility. Updates automatically using GPS.
+            </div>
+        </div>
+        <div class="sidebar-section">
             <div class="weather-grid" id="weather-grid">
                 <div class="weather-card"><div class="val" id="w-temp">--°C</div><div class="lbl">Temp</div></div>
                 <div class="weather-card"><div class="val" id="w-wind">-- km/h</div><div class="lbl">Wind</div></div>
@@ -629,25 +772,24 @@
 
         <!-- AI Assistant -->
         <div class="sidebar-section">
-            <h3>🤖 Ranger AI Assistant</h3>
+            <h3>🤖 Zimelia AI Assistant</h3>
             <input type="text" id="ai-query" placeholder="Type country, area, or command..." style="margin-bottom:8px;">
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                 <button class="btn small primary" onclick="runMiniAI()">Analyze</button>
                 <button class="btn small" onclick="summarizeReports()">Summarize Reports</button>
             </div>
-            <div id="ai-output">Ranger AI ready.</div>
+            <div id="ai-output">Zimelia AI ready.</div>
         </div>
 
         <div class="sidebar-section"><h3>💻 Dispatch Terminal</h3>
-            <div id="terminal-panel"><p class="line">RANGER-OS v27 — Fixed Windy webcams</p></div>
+            <div id="terminal-panel"><p class="line">LUMINARA-OS v29 — Welcome Luminarian</p></div>
         </div>
 
-        <!-- Windy Webcams Section (fixed switchCloudCam) -->
+        <!-- Windy Webcams Section -->
         <div class="sidebar-section">
             <h3>📹 Windy Live Cameras</h3>
             <div id="windy-container" style="width:100%;min-height:250px;background:#000;border-radius:10px;overflow:hidden;"></div>
             <div id="cloud-status" style="font-size:11px;color:#fff;background:rgba(0,0,0,0.8);padding:4px 8px;text-align:center;font-family:monospace;margin-top:4px;border-radius:6px;">STATUS: READY</div>
-            <!-- Camera Buttons (grid 2 columns) -->
             <div id="camera-buttons" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
                 <button class="btn small" onclick="switchCloudCam(0)">🌴 Boracay</button>
                 <button class="btn small" onclick="switchCloudCam(1)">🌤️ Tapaz</button>
@@ -658,33 +800,28 @@
                 <button class="btn small" onclick="switchCloudCam(6)">🌥️ San Fernando</button>
             </div>
         </div>
-
-        <!-- Radio Comms -->
-        <div class="sidebar-section"><h3>📻 Radio Comms</h3>
-            <div id="radio-messages" style="max-height:90px; overflow-y:auto; background:var(--card-bg); border-radius:6px; padding:6px;"></div>
-            <div style="display:flex; gap:4px; margin-top:6px;">
-                <input id="chat-input" placeholder="Message..." style="flex:1; font-size:0.7rem;">
-                <button class="btn small primary" onclick="sendChat()">Send</button>
-                <button class="btn small accent3" onclick="toggleVoiceRecording()" id="voice-btn">🎙️ Record</button>
-            </div>
-        </div>
     </aside>
 
     <button id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
 
     <div id="map-container">
         <div id="map"></div>
-        <div class="map-controls">
-            <button class="nav-toggle-btn" onclick="toggleNavMenu()">☰</button>
-            <div class="nav-menu hidden" id="nav-menu">
+
+        <!-- OPS MENU (with tooltip on Radar button) -->
+        <div class="nav-panel">
+            <button class="nav-toggle" onclick="toggleNavMenu()">☰ OPS MENU</button>
+            <div class="nav-menu" id="navMenu">
                 <button class="btn small" onclick="centerOnUser()">📍 My Location</button>
-                <button class="btn small" onclick="toggleRadar()" id="radar-btn">🌧️ Radar</button>
+                <div class="tooltip">
+                    <button class="btn small" onclick="toggleRadar()" id="radar-btn">🌧️ Radar</button>
+                    <div class="tooltip-text">Toggles live precipitation radar overlay on the map.</div>
+                </div>
                 <button class="btn small" onclick="toggleSatellite()" id="satellite-btn">🛰️ Satellite</button>
-                <button class="btn small" onclick="toggleGPSTracking()" id="gps-status-btn">🛰️ GPS</button>
-                <button class="btn small" onclick="toggleWeatherMode()" id="weatherModeBtn">🌦️ Weather</button>
-                <button class="btn small" onclick="toggleAircraftTracking()" id="aircraft-btn">✈️ Aircraft</button>
+                <button class="btn small" id="gps-status-btn" onclick="toggleGPSTracking()">📡 GPS</button>
+                <button class="btn small" id="weatherModeBtn" onclick="toggleWeatherMode()">🌦️ Weather</button>
             </div>
         </div>
+
         <div class="map-overlay-bottom" id="coord-display">📍 Click map: Report (normal) | Toggle Weather Mode for weather‑at‑click</div>
         <div class="alert-banner" id="alert-banner" onclick="this.style.display='none'">⚠️ ALERT</div>
     </div>
@@ -693,6 +830,30 @@
     <div class="globe-widget" id="globeWidget">
         <div class="globe-sphere">🌍</div>
         <div class="globe-label">MAP GLOBE</div>
+    </div>
+
+    <!-- Floating Radio Widget -->
+    <div id="floating-radio">
+        <div id="radio-header">📻 Luminara Radio</div>
+        <div id="radio-messages"></div>
+        <div id="radio-input-area">
+            <input id="chat-input" placeholder="Send message...">
+            <button onclick="sendChat()">➤</button>
+        </div>
+        <div id="online-users">
+            <div class="user-title">🟢 Active Luminarians</div>
+            <div id="user-list">
+                <div class="user-item">🦊 Zimelia Alpha</div>
+                <div class="user-item">🛰️ Scout Unit</div>
+                <div class="user-item">🚓 Patrol East</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Greeting Box (new) -->
+    <div id="ai-greeting-box">
+        <div id="ai-title">🦊 Zimelia AI</div>
+        <div id="ai-typing-text"></div>
     </div>
 </div>
 
@@ -735,11 +896,11 @@
     </div>
 </div>
 
-<!-- AI Popup -->
+<!-- AI Popup (legacy) -->
 <div id="ai-popup">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
         <div style="font-size:28px;">🤖</div>
-        <div><div style="font-weight:700;font-size:15px;">Ranger AI Assistant</div><div style="font-size:11px;opacity:0.7;">NEXUS INTELLIGENCE SYSTEM</div></div>
+        <div><div style="font-weight:700;font-size:15px;">Zimelia AI Assistant</div><div style="font-size:11px;opacity:0.7;">LUMINARA INTELLIGENCE SYSTEM</div></div>
     </div>
     <div id="ai-popup-message" style="font-size:13px;line-height:1.5;">Initializing AI systems...</div>
     <button onclick="closeAIPopup()" style="margin-top:14px;width:100%;padding:8px;border:none;border-radius:10px;cursor:pointer;background:#2e7d32;color:white;font-weight:600;">Continue</button>
@@ -748,11 +909,11 @@
 <!-- AI Chatbox -->
 <div id="ai-chatbox">
     <div id="ai-header" onclick="toggleAIChat()">
-        <div style="display:flex;align-items:center;gap:10px;"><div id="ai-orb"></div><div><div style="font-weight:700;">Ranger AI</div><div style="font-size:11px;opacity:0.7;">Surveillance Assistant Online</div></div></div>
+        <div style="display:flex;align-items:center;gap:10px;"><div id="ai-orb"></div><div><div style="font-weight:700;">Zimelia AI</div><div style="font-size:11px;opacity:0.7;">Surveillance Assistant Online</div></div></div>
         <button id="ai-close-btn" onclick="event.stopPropagation(); closeAIChatbox()">✕</button>
     </div>
-    <div id="ai-messages"><div class="ai-msg ai-system">Hello Ranger. AI systems initialized.</div></div>
-    <div id="ai-input-area"><input type="text" id="ai-input" placeholder="Ask Ranger AI..." onkeydown="if(event.key==='Enter') sendAIMessage()"><button id="ai-send" onclick="sendAIMessage()">Send</button></div>
+    <div id="ai-messages"><div class="ai-msg ai-system">Hello Luminarian. AI systems initialized.</div></div>
+    <div id="ai-input-area"><input type="text" id="ai-input" placeholder="Ask Zimelia AI..." onkeydown="if(event.key==='Enter') sendAIMessage()"><button id="ai-send" onclick="sendAIMessage()">Send</button></div>
 </div>
 
 <script type="module">
@@ -799,7 +960,7 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     const userIcon = L.divIcon({ html: '<div style="background:#1976d2;border-radius:50%;width:16px;height:16px;box-shadow:0 0 8px #1976d2;"></div>', iconSize: [16,16] });
-    STATE.userMarker = L.marker([STATE.userLat, STATE.userLng], { icon: userIcon }).addTo(map).bindPopup('📍 Ranger Position');
+    STATE.userMarker = L.marker([STATE.userLat, STATE.userLng], { icon: userIcon }).addTo(map).bindPopup('📍 Luminarian Position');
 
     function initRadar() { STATE.radarLayer = L.tileLayer('https://tilecache.rainviewer.com/v2/radar/nowcast/{z}/{x}/{y}/2/1_1.png', { opacity: 0.5 }); }
     initRadar();
@@ -960,7 +1121,7 @@
             windSpeed: document.getElementById('report-wind').value,
             lat, lng,
             timestamp: new Date().toISOString(),
-            author: STATE.loggedInRanger?.name || 'Ranger'
+            author: STATE.loggedInRanger?.name || 'Luminarian'
         };
         if(editId) { const idx = STATE.reports.findIndex(r => r.id === editId); if(idx >= 0) STATE.reports[idx] = report; } else STATE.reports.unshift(report);
         localStorage.setItem('ranger_reports', JSON.stringify(STATE.reports));
@@ -996,7 +1157,7 @@
             const m = L.marker([r.lat, r.lng], { icon }).addTo(map).bindPopup(`
                 <div style="min-width:220px;"><h3>${r.title}</h3><b>Danger:</b> ${r.danger.toUpperCase()}<br><b>Type:</b> ${r.type}<br><hr>
                 🌡️ Temp: ${r.temperature || '--'} °C<br>💨 Wind: ${r.windSpeed || '--'} km/h<br>☁️ Weather: ${r.weather || '--'}<br><hr>
-                🧑 Ranger: ${r.author}<br>🕒 ${new Date(r.timestamp).toLocaleString()}<br><br><button onclick="editReport('${r.id}')">✏️ Edit</button></div>
+                🧑 Luminarian: ${r.author}<br>🕒 ${new Date(r.timestamp).toLocaleString()}<br><br><button onclick="editReport('${r.id}')">✏️ Edit</button></div>
             `);
             STATE.reportMarkers.push(m);
         });
@@ -1009,7 +1170,7 @@
     let gpsWatchId = null;
     function startGPSTracking() { if(navigator.geolocation) gpsWatchId = navigator.geolocation.watchPosition(pos => { STATE.userLat = pos.coords.latitude; STATE.userLng = pos.coords.longitude; STATE.userMarker.setLatLng([STATE.userLat, STATE.userLng]); fetchWeatherData(STATE.userLat, STATE.userLng); document.getElementById('weather-location').innerHTML = `📍 ${STATE.userLat.toFixed(3)}, ${STATE.userLng.toFixed(3)}`; }, err => terminalLog('[WARN] GPS lost'), {enableHighAccuracy:true}); }
     function stopGPSTracking() { if(gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId); }
-    function toggleGPSTracking() { STATE.gpsTracking = !STATE.gpsTracking; STATE.gpsTracking ? startGPSTracking() : stopGPSTracking(); document.getElementById('gps-status-btn').textContent = STATE.gpsTracking ? '🛰️ GPS' : '🛰️ GPS'; showAlert(`GPS ${STATE.gpsTracking?'ON':'OFF'}`); }
+    function toggleGPSTracking() { STATE.gpsTracking = !STATE.gpsTracking; STATE.gpsTracking ? startGPSTracking() : stopGPSTracking(); document.getElementById('gps-status-btn').textContent = STATE.gpsTracking ? '📡 GPS' : '📡 GPS'; showAlert(`GPS ${STATE.gpsTracking?'ON':'OFF'}`); }
     function centerOnUser() { map.setView([STATE.userLat, STATE.userLng], 14); showAlert('Centered on your location'); }
     function toggleRadar() { STATE.radarOn = !STATE.radarOn; STATE.radarOn ? STATE.radarLayer.addTo(map) : STATE.radarLayer.remove(); document.getElementById('radar-btn').textContent = STATE.radarOn ? '🌧️ Radar' : '🌧️ Radar'; terminalLog(`Radar ${STATE.radarOn?'ON':'OFF'}`); showAlert(`Radar ${STATE.radarOn?'enabled':'disabled'}`); }
     function toggleSatellite() { STATE.satelliteMode = !STATE.satelliteMode; if(STATE.satelliteMode) { map.removeLayer(STATE.baseLayerOsm); map.addLayer(STATE.baseLayerSatellite); } else { map.removeLayer(STATE.baseLayerSatellite); map.addLayer(STATE.baseLayerOsm); } document.getElementById('satellite-btn').textContent = STATE.satelliteMode ? '🛰️ Satellite' : '🛰️ Satellite'; showAlert(`Satellite ${STATE.satelliteMode?'ON':'OFF'}`); }
@@ -1027,7 +1188,7 @@
     map.on("zoom", updateGlobeRotation);
     setTimeout(updateGlobeRotation, 500);
 
-    // ==================== WINDY WEBCAMS (FIXED FUNCTION) ====================
+    // ==================== WINDY WEBCAMS ====================
     const cloudCams = [
         { id: "1739611817", name: "Boracay - Crimson Resort" },
         { id: "1638604776", name: "Tapaz" },
@@ -1044,37 +1205,25 @@
         const cam = cloudCams[index];
         const container = document.getElementById("windy-container");
         const status = document.getElementById("cloud-status");
-
         if (!container || !status) return;
-
         status.textContent = `STATUS: LOADING ${cam.name}...`;
-
-        // Windy needs the FULL embed block inserted
         container.innerHTML = `
             <div id="windy-webcam-container">
-                <a
-                    name="windy-webcam-timelapse-player"
-                    data-id="${cam.id}"
-                    data-play="day"
-                    data-loop="0"
-                    data-auto-play="1"
-                    data-force-full-screen-on-overlay-play="0"
-                    data-interactive="1"
-                    href="https://windy.com/webcams/${cam.id}"
-                    target="_blank"
-                >
+                <a name="windy-webcam-timelapse-player"
+                   data-id="${cam.id}"
+                   data-play="day"
+                   data-loop="0"
+                   data-auto-play="1"
+                   data-force-full-screen-on-overlay-play="0"
+                   data-interactive="1"
+                   href="https://windy.com/webcams/${cam.id}"
+                   target="_blank">
                     ${cam.name}
                 </a>
             </div>
         `;
-
-        // Remove old script if exists
         const oldScript = document.getElementById("windy-script");
-        if (oldScript) {
-            oldScript.remove();
-        }
-
-        // Create fresh script
+        if (oldScript) oldScript.remove();
         const script = document.createElement("script");
         script.id = "windy-script";
         script.src = "https://webcams.windy.com/webcams/public/embed/v2/script/player.js";
@@ -1087,7 +1236,6 @@
         document.body.appendChild(script);
     }
 
-    // Auto-load first camera
     window.switchCloudCam = switchCloudCam;
     window.addEventListener("load", () => { setTimeout(() => switchCloudCam(0), 500); });
 
@@ -1111,7 +1259,7 @@
         if (!matches.length) { output.innerHTML = `No reports found for: <b>${query}</b>`; return; }
         let criticalCount = 0, weatherCount = 0, fireCount = 0;
         matches.forEach(report => { if (report.danger === "critical") criticalCount++; if (report.type === "weather") weatherCount++; if (report.type === "fire") fireCount++; });
-        output.innerHTML = `<b>🤖 Ranger AI Analysis</b><br><br>Query: <b>${query}</b><br>Matching Reports: <b>${matches.length}</b><br><br>🔴 Critical Reports: ${criticalCount}<br>🌪️ Weather Reports: ${weatherCount}<br>🔥 Fire Reports: ${fireCount}<br><br><b>Recent Matches:</b><br><br>${matches.slice(0,5).map(report => `• ${report.title}<br><small>${report.danger.toUpperCase()} · ${report.type}</small><br><br>`).join("")}`;
+        output.innerHTML = `<b>🤖 Zimelia AI Analysis</b><br><br>Query: <b>${query}</b><br>Matching Reports: <b>${matches.length}</b><br><br>🔴 Critical Reports: ${criticalCount}<br>🌪️ Weather Reports: ${weatherCount}<br>🔥 Fire Reports: ${fireCount}<br><br><b>Recent Matches:</b><br><br>${matches.slice(0,5).map(report => `• ${report.title}<br><small>${report.danger.toUpperCase()} · ${report.type}</small><br><br>`).join("")}`;
         terminalLog(`Mini AI analyzed query: ${query}`);
     }
 
@@ -1128,7 +1276,7 @@
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const audioURL = URL.createObjectURL(audioBlob);
-                    addVoiceMessage(STATE.loggedInRanger?.name || "Ranger", audioURL);
+                    addVoiceMessage(STATE.loggedInRanger?.name || "Luminarian", audioURL);
                     terminalLog("Voice transmission sent");
                     showAlert("🎙️ Voice message transmitted");
                 };
@@ -1155,27 +1303,54 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    // ==================== RADIO, TERMINAL, ALERTS ====================
-    function addRadioMessage(author, msg) { const box = document.getElementById('radio-messages'); const div = document.createElement('div'); div.innerHTML = `<b>[${author}]</b> ${msg}`; box.appendChild(div); box.scrollTop = box.scrollHeight; }
-    function sendChat() { const inp = document.getElementById('chat-input'); if(inp.value.trim()) { addRadioMessage(STATE.loggedInRanger?.name||'Ranger', inp.value); terminalLog(`RADIO: ${inp.value}`); inp.value=''; } }
+    // ==================== RADIO ====================
+    function addRadioMessage(author, msg) {
+        const box = document.getElementById('radio-messages');
+        const div = document.createElement('div');
+        div.innerHTML = `<b>[${author}]</b> ${msg}`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+    function sendChat() {
+        const inp = document.getElementById('chat-input');
+        if (!inp) return;
+        const msg = inp.value.trim();
+        if (!msg) return;
+        addRadioMessage(STATE.loggedInRanger?.name||'Luminarian', msg);
+        terminalLog(`RADIO: ${msg}`);
+        inp.value = '';
+    }
+
     function terminalLog(msg) { const term = document.getElementById('terminal-panel'); const p = document.createElement('p'); p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`; term.appendChild(p); term.scrollTop = term.scrollHeight; if (term.children.length > 60) term.removeChild(term.firstChild); }
     function showAlert(msg) { const banner = document.getElementById('alert-banner'); banner.textContent = msg; banner.style.display = 'block'; terminalLog(`ALERT: ${msg}`); setTimeout(() => banner.style.display = 'none', 6000); }
-    function rangerLogin() { let name = document.getElementById('ranger-name-input').value.trim(); if(name) { STATE.loggedInRanger = { name }; localStorage.setItem('ranger_login', JSON.stringify(STATE.loggedInRanger)); document.getElementById('login-status').innerHTML = `✅ ${name}`; terminalLog(`Login: ${name}`); showAlert(`Welcome ${name}`); } }
+    function rangerLogin() { let name = document.getElementById('ranger-name-input').value.trim(); if(name) { STATE.loggedInRanger = { name }; localStorage.setItem('ranger_login', JSON.stringify(STATE.loggedInRanger)); document.getElementById('login-status').innerHTML = `✅ ${name}`; terminalLog(`Login: ${name}`); showAlert(`Welcome Luminarian ${name}`); } }
     function simulateEmergency() { showAlert('🚨 EMERGENCY ALERT: Code Red in Sector 7'); addRadioMessage('DISPATCH', 'EMERGENCY ACTIVE'); }
-    function triggerAIEvent() { const ev = { title:'AI Scout Report', type:'wildlife', danger:'medium', desc:'Automated alert', lat:STATE.userLat+(Math.random()-0.5)*0.04, lng:STATE.userLng+(Math.random()-0.5)*0.04 }; const report={ id:Date.now().toString(), title:ev.title, desc:ev.desc, type:ev.type, danger:ev.danger, weather:'Sunny', temperature:'', windSpeed:'', lat:ev.lat, lng:ev.lng, timestamp:new Date().toISOString(), author:'AI' }; STATE.reports.unshift(report); localStorage.setItem('ranger_reports', JSON.stringify(STATE.reports)); refreshAllReportMarkers(); map.setView([ev.lat,ev.lng],13); showAlert(`🤖 AI Event: ${ev.title}`); terminalLog(`AI event generated`); }
+    function triggerAIEvent() { const ev = { title:'AI Scout Report', type:'wildlife', danger:'medium', desc:'Automated alert', lat:STATE.userLat+(Math.random()-0.5)*0.04, lng:STATE.userLng+(Math.random()-0.5)*0.04 }; const report={ id:Date.now().toString(), title:ev.title, desc:ev.desc, type:ev.type, danger:ev.danger, weather:'Sunny', temperature:'', windSpeed:'', lat:ev.lat, lng:ev.lng, timestamp:new Date().toISOString(), author:'Zimelia AI' }; STATE.reports.unshift(report); localStorage.setItem('ranger_reports', JSON.stringify(STATE.reports)); refreshAllReportMarkers(); map.setView([ev.lat,ev.lng],13); showAlert(`🤖 AI Event: ${ev.title}`); terminalLog(`AI event generated`); }
     function toggleDarkMode() { STATE.darkMode = !STATE.darkMode; document.body.classList.toggle('dark', STATE.darkMode); localStorage.setItem('ranger_darkmode', STATE.darkMode); if(STATE.chart) updateWeatherChart(); showAlert(`Theme: ${STATE.darkMode?'Dark':'Light'}`); }
     function toggleSidebar() { const sidebar = document.getElementById('sidebar'); sidebar.classList.toggle('collapsed'); setTimeout(() => map.invalidateSize(), 350); }
-    function toggleNavMenu() { const menu = document.getElementById("nav-menu"); menu.classList.toggle("hidden"); }
+    function toggleNavMenu() { document.getElementById("navMenu").classList.toggle("active"); }
 
-    // ==================== AI GREETING & CHATBOX ====================
+    // ==================== AI GREETING & TYPING ====================
+    function typeGreeting(text) {
+        const element = document.getElementById("ai-typing-text");
+        if (!element) return;
+        element.innerHTML = "";
+        let index = 0;
+        const interval = setInterval(() => {
+            element.innerHTML += text[index];
+            index++;
+            if (index >= text.length) clearInterval(interval);
+        }, 35);
+    }
+
     function showAIGreeting() {
         const popup = document.getElementById("ai-popup");
         const msg = document.getElementById("ai-popup-message");
-        let rangerName = "Ranger";
+        let rangerName = "Luminarian";
         if (STATE.loggedInRanger?.name) rangerName = STATE.loggedInRanger.name;
-        const greetings = [`Welcome back, ${rangerName}. All surveillance systems are operational.`, `Hello ${rangerName}. Weather monitoring and patrol systems are online.`, `${rangerName}, the Ranger Nexus network is active and tracking live conditions.`, `Greetings ${rangerName}. AI analysis systems ready for field operations.`];
+        const greetings = [`Welcome back, ${rangerName}. All Luminara systems are operational.`, `Hello ${rangerName}. Weather monitoring and patrol systems are online.`, `${rangerName}, the Luminara network is active and tracking live conditions.`, `Greetings ${rangerName}. Zimelia AI is ready for field operations.`];
         const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-        msg.innerHTML = `${randomGreeting}<br><br>🌦️ Weather systems active<br>📡 Radar online<br>📹 ${cloudCams.length} Windy cameras connected (fixed script reload)<br>🌍 Globe tracking initialized<br>💬 AI Chatbox ready<br>✈️ Live aircraft tracking active`;
+        msg.innerHTML = `${randomGreeting}<br><br>🌦️ Weather systems active<br>📡 Radar online<br>📹 ${cloudCams.length} Windy cameras connected<br>🌍 Globe tracking initialized<br>💬 AI Chatbox ready<br>✈️ Live aircraft tracking active`;
         setTimeout(() => { popup.style.transform = "translateX(0px)"; }, 800);
     }
     function closeAIPopup() { const popup = document.getElementById("ai-popup"); popup.style.transform = "translateX(400px)"; }
@@ -1203,9 +1378,9 @@
         const lowerMsg = msg.toLowerCase();
         if (lowerMsg.includes("weather")) reply = `Current weather: ${document.getElementById('w-temp').innerHTML}, wind ${document.getElementById('w-wind').innerHTML}, UV ${document.getElementById('w-uv').innerHTML}.`;
         else if (lowerMsg.includes("report") || lowerMsg.includes("incident")) reply = `There are ${STATE.reports.length} active reports. Use "Summarize Reports" for details.`;
-        else if (lowerMsg.includes("aircraft") || lowerMsg.includes("plane")) reply = `Aircraft tracking is ${STATE.aircraftTracking ? "ON" : "OFF"}. Toggle it from the map menu.`;
+        else if (lowerMsg.includes("aircraft") || lowerMsg.includes("plane")) reply = `Aircraft tracking is ${STATE.aircraftTracking ? "ON" : "OFF"}. Toggle it from the OPS menu.`;
         else if (lowerMsg.includes("uv")) reply = `UV index is ${document.getElementById('w-uv').innerHTML}. ${document.getElementById('uv-status').innerText}`;
-        else if (lowerMsg.includes("hello") || lowerMsg.includes("hi")) reply = `Hello Ranger ${STATE.loggedInRanger?.name || ""}. How can I assist?`;
+        else if (lowerMsg.includes("hello") || lowerMsg.includes("hi")) reply = `Hello Luminarian ${STATE.loggedInRanger?.name || ""}. How can I assist?`;
         else reply = `Acknowledged. I can provide weather, report summaries, aircraft status, and more. Try asking about weather, reports, or aircraft.`;
         setTimeout(() => {
             const botDiv = document.createElement("div");
@@ -1219,7 +1394,7 @@
 
     // ==================== MAP CLICK HANDLER ====================
     map.on('click', async (e) => {
-        document.getElementById("nav-menu")?.classList.add("hidden");
+        document.getElementById("navMenu")?.classList.remove("active");
         if (window.innerWidth <= 768) document.getElementById('sidebar').classList.add('collapsed');
         if (STATE.weatherMode) await loadWeatherAtClick(e.latlng.lat, e.latlng.lng);
         else openReportModal(e.latlng.lat, e.latlng.lng);
@@ -1242,12 +1417,16 @@
     function init() {
         if(STATE.darkMode) document.body.classList.add('dark');
         showAIGreeting();
+        // Type the greeting in the new AI box
+        setTimeout(() => {
+            typeGreeting("Welcome back, Luminarian. Weather monitoring systems are active. Radar and environmental surveillance online.");
+        }, 700);
         startGPSTracking();
         fetchWeatherData(STATE.userLat, STATE.userLng);
         refreshAllReportMarkers();
         setInterval(() => fetchWeatherData(STATE.userLat, STATE.userLng), 300000);
-        terminalLog('Ranger Nexus v27 | Windy webcams fixed (script reload on switch)');
-        showAlert('System ready. Webcams now reload correctly when switched.');
+        terminalLog('Luminara v29 | AI greeting box, tooltips, hover effects added');
+        showAlert('System ready. Welcome Luminarian.');
     }
     document.getElementById('report-modal')?.addEventListener('click', (e) => { if(e.target === document.getElementById('report-modal')) closeReportModal(); });
     init();
