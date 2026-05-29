@@ -666,12 +666,12 @@
         }
 
         /* ================================
-           🌍 GLOBE WIDGET - RIGHT SIDE CENTERED
+           🌍 GLOBE WIDGET - LEFT SIDE CENTERED
         ================================ */
         #globeWidget {
             position: fixed;
-            right: 20px;
-            left: auto;
+            left: 20px;
+            right: auto;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1200;
@@ -706,7 +706,8 @@
                 width: 140px;
                 height: 140px;
                 font-size: 55px;
-                right: 10px;
+                left: 10px;
+                right: auto;
                 top: auto;
                 bottom: 90px;
                 transform: none;
@@ -1683,7 +1684,7 @@
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Animated Globe Widget (repositioned right side centered) -->
+    <!-- Animated Globe Widget (repositioned left side) -->
     <div id="globeWidget">🌍</div>
 </div>
 
@@ -2592,7 +2593,7 @@ Stay alert, Luminarian.`;
         refreshAllReportMarkers();
         updateUserList();
         setInterval(() => fetchWeatherData(STATE.userLat, STATE.userLng), 300000);
-        terminalLog('Luminara v36 | Advanced feature pack integrated | Globe repositioned right side');
+        terminalLog('Luminara v36 | Advanced feature pack integrated | Globe repositioned left side');
         showAlert('System ready. Use top-left buttons for controls.');
         addTimelineEvent('System initialized');
     }
