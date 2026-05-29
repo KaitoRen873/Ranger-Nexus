@@ -503,98 +503,6 @@
         }
 
         /* ================================
-           MINI WINDY MAP WINDOW (KEPT)
-        ================================ */
-        #windyMiniWindow{
-            position:fixed;
-            right:24px;
-            bottom:24px;
-            width:420px;
-            height:320px;
-            background:rgba(5,15,25,0.96);
-            border-radius:20px;
-            overflow:hidden;
-            z-index:5000;
-            border:1px solid rgba(0,255,255,0.15);
-            box-shadow:0 0 30px rgba(0,255,255,0.15);
-            backdrop-filter:blur(14px);
-            display:none;
-            animation:windyOpen 0.35s ease;
-        }
-
-        @keyframes windyOpen{
-            from{ transform:translateY(20px) scale(0.9); opacity:0; }
-            to{ transform:translateY(0) scale(1); opacity:1; }
-        }
-
-        #windyMiniHeader{
-            height:44px;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:0 14px;
-            background:linear-gradient(90deg, rgba(0,255,255,0.12), rgba(0,120,255,0.08));
-            color:white;
-            font-size:13px;
-            font-weight:700;
-        }
-
-        .windyControls{
-            display:flex;
-            gap:6px;
-        }
-
-        .windyControls button{
-            width:26px;
-            height:26px;
-            border:none;
-            border-radius:8px;
-            background:rgba(255,255,255,0.08);
-            color:white;
-            cursor:pointer;
-            transition:0.2s;
-        }
-
-        .windyControls button:hover{
-            background:rgba(0,255,255,0.18);
-        }
-
-        #windyFrame{
-            width:100%;
-            height:calc(100% - 44px);
-            border:none;
-        }
-
-        #openWindyBtn{
-            position:fixed;
-            right:24px;
-            bottom:24px;
-            z-index:4999;
-            padding:12px 18px;
-            border:none;
-            border-radius:14px;
-            background:linear-gradient(135deg, rgba(0,255,255,0.25), rgba(0,120,255,0.18));
-            color:white;
-            font-weight:700;
-            cursor:pointer;
-            box-shadow:0 0 20px rgba(0,255,255,0.12);
-            transition:0.25s ease;
-        }
-
-        #openWindyBtn:hover{
-            transform:translateY(-2px);
-        }
-
-        @media(max-width:768px){
-            #windyMiniWindow{
-                width:94vw;
-                height:300px;
-                right:3vw;
-                bottom:18px;
-            }
-        }
-
-        /* ================================
            USER LIST
         ================================ */
         #online-users-list{
@@ -1635,19 +1543,6 @@
 <!-- Animated Globe Widget -->
 <div id="globe-widget">🌍</div>
 
-<!-- MINI WINDY WEATHER MAP WINDOW (KEPT) -->
-<div id="windyMiniWindow">
-    <div id="windyMiniHeader">
-        <span>🌍 Windy Weather Map</span>
-        <div class="windyControls">
-            <button onclick="minimizeWindy()">—</button>
-            <button onclick="closeWindy()">✕</button>
-        </div>
-    </div>
-    <iframe id="windyFrame" src="https://embed.windy.com/embed2.html?lat=14.5995&lon=120.9842&zoom=6&level=surface&overlay=wind&menu=&message=true&marker=true&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=14.5995&detailLon=120.9842&metricWind=default&metricTemp=default&radarRange=-1" allowfullscreen></iframe>
-</div>
-<button id="openWindyBtn" onclick="openWindyWindow()">🌦️ Windy</button>
-
 <!-- Particle + Aurora Canvas -->
 <canvas id="bgEffects"></canvas>
 
@@ -2339,20 +2234,6 @@
         frame.src = `https://embed.windy.com/embed2.html?lat=14.5995&lon=120.9842&zoom=5&level=surface&overlay=${layer}&menu=&message=true&marker=true&calendar=&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default`;
     }
 
-    // ==================== MINI WINDY WEATHER MAP FUNCTIONS ====================
-    function openWindyWindow(){
-        document.getElementById("windyMiniWindow").style.display = "block";
-        document.getElementById("openWindyBtn").style.display = "none";
-    }
-    function closeWindy(){
-        document.getElementById("windyMiniWindow").style.display = "none";
-        document.getElementById("openWindyBtn").style.display = "block";
-    }
-    function minimizeWindy(){
-        const win = document.getElementById("windyMiniWindow");
-        win.style.height = "44px";
-    }
-
     // ==================== SIDEBAR TOGGLE ====================
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -2405,7 +2286,7 @@ Stay alert, Luminarian.`;
         closeReportModal, saveReport, deleteReportFromModal, editReport, renderReportList,
         toggleWeatherMode, terminalLog, showAlert, addRadioMessage, fetchWeatherData,
         switchCloudCam, toggleAirTraffic, toggleEarthquakes, sendFloatingRadioMessage, sendAIMessage,
-        toggleSidebar, openWindyWindow, closeWindy, minimizeWindy, setWindyLayer
+        toggleSidebar, setWindyLayer
     });
 
     // ==================== INIT ====================
@@ -2416,7 +2297,7 @@ Stay alert, Luminarian.`;
         refreshAllReportMarkers();
         updateUserList();  // Initialize user list
         setInterval(() => fetchWeatherData(STATE.userLat, STATE.userLng), 300000);
-        terminalLog('Luminara v36 | Right sidebar + toggle button integrated | Windycam upgraded | User list & windy sidebar panel added');
+        terminalLog('Luminara v36 | Right sidebar + toggle button integrated | Windycam upgraded | User list & windy sidebar panel added | Removed mini windy map');
         showAlert('System ready. Use top-left buttons for controls.');
     }
     document.getElementById('report-modal')?.addEventListener('click', (e) => { if(e.target === document.getElementById('report-modal')) closeReportModal(); });
